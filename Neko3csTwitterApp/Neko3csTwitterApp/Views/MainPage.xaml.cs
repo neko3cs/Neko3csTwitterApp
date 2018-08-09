@@ -7,7 +7,7 @@ using Xamarin.Forms;
 
 namespace Neko3csTwitterApp.Views
 {
-    public partial class MainPage : ContentPage
+    public partial class MainPage : TabbedPage
     {
         public MainPage()
         {
