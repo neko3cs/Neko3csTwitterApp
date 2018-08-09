@@ -1,6 +1,5 @@
 ﻿using Prism;
 using Prism.Ioc;
-using Neko3csTwitterApp.ViewModels;
 using Neko3csTwitterApp.Views;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
@@ -31,6 +30,8 @@ namespace Neko3csTwitterApp
         {
             containerRegistry.RegisterForNavigation<NavigationPage>();
             containerRegistry.RegisterForNavigation<MainPage>();
+            containerRegistry.RegisterForNavigation<HomePage>();
+            containerRegistry.RegisterForNavigation<SettingsPage>();
         }
     }
 }

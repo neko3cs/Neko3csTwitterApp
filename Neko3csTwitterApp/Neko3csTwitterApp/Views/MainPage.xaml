@@ -1,6 +1,17 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<ContentPage xmlns="http://xamarin.com/schemas/2014/forms" xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml" x:Class="Neko3csTwitterApp.Views.MainPage" Title="{Binding Title}">
-    <StackLayout HorizontalOptions="CenterAndExpand" VerticalOptions="CenterAndExpand">
-        <Label Text="Welcome to Xamarin Forms and Prism!" />
-    </StackLayout>
-</ContentPage>
+<?xml version="1.0" encoding="utf-8"?>
+<TabbedPage xmlns="http://xamarin.com/schemas/2014/forms"
+            xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+            xmlns:prism="clr-namespace:Prism.Mvvm;assembly=Prism.Forms"
+            xmlns:Views="clr-namespace:Neko3csTwitterApp.Views"
+            x:Class="Neko3csTwitterApp.Views.MainPage"
+            prism:ViewModelLocator.AutowireViewModel="True"
+            Title="{Binding Title}">
+    <TabbedPage.Padding>
+        <OnPlatform x:TypeArguments="Thickness">
+            <On Platform="iOS" Value="0,20,0,0" />
+        </OnPlatform>
+    </TabbedPage.Padding>
+    
+    <Views:HomePage />
+    <Views:SettingsPage />
+</TabbedPage>
