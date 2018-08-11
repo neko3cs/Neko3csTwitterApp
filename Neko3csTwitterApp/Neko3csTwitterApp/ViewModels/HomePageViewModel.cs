@@ -1,47 +1,46 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Prism.Commands;
-using Prism.Navigation;
-using Prism.Logging;
-using Prism.Services;
 using System.Text;
-using Reactive.Bindings;
 using Neko3csTwitterApp.Models;
+using Prism.Navigation;
+using Reactive.Bindings;
 
 namespace Neko3csTwitterApp.ViewModels
 {
     public class HomePageViewModel : ViewModelBase
     {
+        #region ReactiveProperty
         public ReactiveProperty<string> TimeLineString => timeLineString;
         private ReactiveProperty<string> timeLineString = new ReactiveProperty<string>("No Tweet Read.");
+        #endregion
 
+        #region ReactiveCommand
         public ReactiveCommand ReloadTimeLineCommand { get; private set; }
+        #endregion
 
         public HomePageViewModel(INavigationService navigationService) : base(navigationService)
         {
             Title = "Home";
 
-            ReloadTimeLineCommand.Subscribe(_ =>
+            ReloadTimeLineCommand.Subscribe(async _ =>
             {
                 try
                 {
-                    if (UserAccount.Tokens == null) { return; }
+                    if (TwitterUser.Tokens == null) { return; }
 
-                    var timeLine = new StringBuilder();
-                    foreach (var status in UserAccount.Tokens.Statuses.HomeTimeline())
+                    var homeTimeLine = await TwitterUser.Tokens.Statuses.HomeTimelineAsync();
+                    var buff = new StringBuilder();
+                    foreach (var status in homeTimeLine)
                     {
-                        timeLine.AppendLine("------------------------------");
-                        timeLine.AppendLine($"{status.User.Name}({status.User.ScreenName})");
-                        timeLine.AppendLine(status.Text);
+                        buff.AppendLine("------------------------------");
+                        buff.AppendLine($"{status.User.Name}({status.User.ScreenName})");
+                        buff.AppendLine(status.Text);
                     }
 
-                    TimeLineString.Value = timeLine.ToString();
+                    TimeLineString.Value = buff.ToString();
                 }
                 catch (Exception ex)
                 {
-                    Logger.Instance.WriteError("例外エラーが発生しました。", ex);
+                    App.Logger.Error(ex.Message + Environment.NewLine + ex.StackTrace);
                 }
             });
         }

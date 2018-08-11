@@ -1,82 +1,75 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Prism.Commands;
-using Prism.Navigation;
-using Prism.Logging;
-using Prism.Services;
-using Reactive.Bindings;
-using Neko3csTwitterApp.Models;
-using CoreTweet;
 using System.Diagnostics;
+using System.Reactive.Linq;
 using System.Text;
+using CoreTweet;
+using Neko3csTwitterApp.Models;
+using Prism.Navigation;
+using Reactive.Bindings;
+using Xamarin.Forms;
 
 namespace Neko3csTwitterApp.ViewModels
 {
     public class SettingsPageViewModel : ViewModelBase
     {
+        #region ReactiveProperty
         public ReactiveProperty<string> PinCode => PinCode;
         private ReactiveProperty<string> pinCode = new ReactiveProperty<string>();
 
-        public ReactiveProperty<string> UserIcon => userIcon;
-        private ReactiveProperty<string> userIcon = new ReactiveProperty<string>();
+        public ReactiveProperty<ImageSource> UserIcon => userIcon;
+        private ReactiveProperty<ImageSource> userIcon = new ReactiveProperty<ImageSource>();
 
-        public ReactiveProperty<bool> IsVisibleUserIcon => isVisibleUserIcon;
-        private ReactiveProperty<bool> isVisibleUserIcon = new ReactiveProperty<bool>();
+        public ReactiveProperty<bool> IsVisibleUserIcon { get; private set; }
 
         public ReactiveProperty<string> UserInfo => userInfo;
         private ReactiveProperty<string> userInfo = new ReactiveProperty<string>();
+        #endregion
 
+        #region ReactiveCommand
         public ReactiveCommand StartingAuthCommand { get; private set; }
 
         public ReactiveCommand UserAuthCommand { get; private set; }
-
+        #endregion
 
         public SettingsPageViewModel(INavigationService navigationService) : base(navigationService)
         {
             Title = "Settings";
 
+            IsVisibleUserIcon = UserIcon.Select(x => x != null)
+                                        .ToReactiveProperty();
 
             StartingAuthCommand.Subscribe(async _ =>
             {
-                UserAccount.Session = await OAuth.AuthorizeAsync(UserAccount.APIKey, UserAccount.APISecret);
-                Process.Start(UserAccount.Session.AuthorizeUri.AbsoluteUri);
+                TwitterUser.Session = await OAuth.AuthorizeAsync(TwitterUser.APIKey, TwitterUser.APISecret);
+                Process.Start(TwitterUser.Session.AuthorizeUri.AbsoluteUri);
             });
 
             UserAuthCommand.Subscribe(async _ =>
             {
                 try
                 {
-                    UserAccount.Tokens = await UserAccount.Session.GetTokensAsync(PinCode.Value);
+                    TwitterUser.Tokens = await TwitterUser.Session.GetTokensAsync(PinCode.Value);
 
-                    if (UserAccount.Tokens.Account.VerifyCredentialsAsync() != null)
+                    if (TwitterUser.Tokens.Account.VerifyCredentialsAsync() != null)
                     {
-                        // TODO : Xamarinでの画像の扱い方
-                        //userIcon = new BitmapImage(new Uri(UserAccount.Tokens.Account.VerifyCredentials().ProfileImageUrl));
-                        userIcon.Value = "hoge";
-                        isVisibleUserIcon.Value = true;
+                        var response = await TwitterUser.Tokens.Account.VerifyCredentialsAsync();
 
-                        // TODO : API変わったせいかなぜか取得できない
-                        //var name = await UserAccount.Tokens.Account.VerifyCredentialsAsync().Name;
-                        //var screenName = await UserAccount.Tokens.Account.VerifyCredentialsAsync().ScreenName;
-                        var name = "hogehoge";
-                        var screenName = "fugafuga";
-
+                        userIcon.Value = ImageSource.FromUri(new Uri(response.ProfileImageUrl));
+                        IsVisibleUserIcon.Value = true;
 
                         var builder = new StringBuilder();
-                        builder.AppendLine($"UserName : { name }");
-                        builder.Append($"UserID : @{ screenName }");
+                        builder.AppendLine($"UserName : { response.Name }");
+                        builder.Append($"UserID : @{ response.ScreenName }");
                         userInfo.Value = builder.ToString();
                     }
                     else
                     {
-                        /* 認証失敗(なんか対処して) */
+                        App.Logger.Warn("ログイン認証失敗");
                     }
                 }
-                catch
+                catch (Exception ex)
                 {
-                    throw;
+                    App.Logger.Error(ex.Message + Environment.NewLine + ex.StackTrace);
                 }
             });
         }

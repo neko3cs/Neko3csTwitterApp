@@ -1,15 +1,20 @@
-﻿using Prism;
+﻿using Neko3csTwitterApp.Views;
+using Prism;
 using Prism.Ioc;
-using Neko3csTwitterApp.Views;
+using Prism.Logging;
+using Prism.Unity;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
-using Prism.Unity;
 
 [assembly: XamlCompilation(XamlCompilationOptions.Compile)]
 namespace Neko3csTwitterApp
 {
     public partial class App : PrismApplication
     {
+        #region "Global Instance"
+        public static NLog.Logger Logger = NLog.LogManager.GetCurrentClassLogger();
+        #endregion
+
         /* 
          * The Xamarin Forms XAML Previewer in Visual Studio uses System.Activator.CreateInstance.
          * This imposes a limitation in which the App class must have a default constructor. 
@@ -28,6 +33,9 @@ namespace Neko3csTwitterApp
 
         protected override void RegisterTypes(IContainerRegistry containerRegistry)
         {
+            // Prismログをデバッグログへ表示
+            containerRegistry.RegisterSingleton<ILoggerFacade, DebugLogger>();
+
             containerRegistry.RegisterForNavigation<NavigationPage>();
             containerRegistry.RegisterForNavigation<MainPage>();
             containerRegistry.RegisterForNavigation<HomePage>();
