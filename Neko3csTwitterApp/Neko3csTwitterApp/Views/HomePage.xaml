@@ -10,9 +10,9 @@
     </ContentPage.Padding>
     
     <StackLayout HorizontalOptions="CenterAndExpand" Margin="0,20,0,0">
-        <Button Text="Reload" Command="{ Binding ReloadTimeLineCommand }" />
+        <Button Text="Reload" Command="{Binding ReloadTimeLineCommand}" />
         <ScrollView>
-            <Label Text="{ Binding TimeLineString }" HorizontalOptions="StartAndExpand" VerticalOptions="StartAndExpand"
+            <Label Text="{Binding TimeLineString.Value}" HorizontalOptions="StartAndExpand" VerticalOptions="StartAndExpand"
                    IsEnabled="false" />
         </ScrollView>
     </StackLayout>

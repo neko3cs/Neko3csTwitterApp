@@ -3,7 +3,7 @@ using CoreTweet;
 
 namespace Neko3csTwitterApp.Models
 {
-    public static class UserAccount
+    public static class TwitterUser
     {
         public static OAuth.OAuthSession Session;
         public static Tokens Tokens;
